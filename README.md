@@ -23,3 +23,21 @@ bash bash_scripts/generate_rag_dataset.sh
 ```
 
 A patient and doctor dataset will be provided `rag_dataset_patient.json` and `rag_dataset_doctor.json`.
+
+
+# To Launch the chatbot 
+
+Before doing anything please make sure to specify the following API keys necessary for the chatbot : 
+
+```bash 
+"MISTRAL_API_KEY"
+"TAVILY_API_KEY"
+"HF_TOKEN"
+"LANGCHAIN_API_KEY"
+```
+
+Launch `main.py` to get your personal oncology specialized assistant that will help you through your diagnosis ! 
+
+```python 
+python main.py
+```
