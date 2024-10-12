@@ -107,6 +107,7 @@ class MistralChatbot:
         ehr_path,
         mistral_model="mistral-large-latest",
         temperature=0.0,
+        debug=False,
     ) -> None:
         # QUESTION CAN YOU CHANGE THE TEMPERATURE DEPENDING ON THE FLOW ?
         self.llm = ChatMistralAI(model=mistral_model, temperature=temperature)
@@ -118,6 +119,8 @@ class MistralChatbot:
         self.db_patient_path = db_patient_path
         self.db_doctor_path = db_doctor_path
         self.ehr_path = ehr_path
+        self.debug = debug
+        self.counter = 0
 
         # setting up database
         self.setup_rag_db()
@@ -156,9 +159,12 @@ class MistralChatbot:
         """
         This is the first step in our solution. We route the patient's question depending on the complexity of the question (query).
         """
-        return self.structured_llm_router.invoke(
+        routed = self.structured_llm_router.invoke(
             [SystemMessage(content=self.router_prompt)] + [HumanMessage(content=query)]
         )
+        if self.debug:
+            print("routed", routed)
+        return routed
 
     def answer_complex_question(self, question):
         """
@@ -170,6 +176,10 @@ class MistralChatbot:
             context=docs_txt, questions=question
         )
         generation = self.llm.invoke([HumanMessage(content=rag_prompt_formatted)])
+        if self.debug:
+            print("rag_prompt_formatted,", rag_prompt_formatted)
+            print("\n generation: ", generation)
+
         return generation
 
     def answer_simple_question(self, question):
@@ -177,11 +187,13 @@ class MistralChatbot:
         If the question is deemed easy just the patient's EHR will help provide context.
         """
         ehr = open(self.ehr_path, "r").read()
-        question = "How do I come down im stressed about my surgery ?"
         simple_prompt_formatted = self.simple_question_prompt.format(
             ehr=ehr, question=question
         )
         generation = self.llm.invoke([HumanMessage(content=simple_prompt_formatted)])
+        if self.debug:
+            print("simple_prompt_formatted,", simple_prompt_formatted)
+            print("\n generation: ", generation)
         return generation
 
     def grade_hallucinations(self, question, generation):
@@ -192,10 +204,13 @@ class MistralChatbot:
         hallucination_grader_prompt_formatted = self.hallucination_grader_prompt.format(
             documents=docs, generation=generation
         )
-        return self.structured_llm_hallucination_grader.invoke(
+        hallucinated = self.structured_llm_hallucination_grader.invoke(
             [SystemMessage(content=self.hallucination_grader_instructions)]
             + [HumanMessage(content=hallucination_grader_prompt_formatted)]
         )
+        if self.debug:
+            print("hallucinated,", hallucinated)
+        return hallucinated
 
     @staticmethod
     def format_docs(docs):
@@ -210,7 +225,8 @@ class MistralChatbot:
             generation = self.answer_simple_question(question)
         else:
             generation = self.answer_complex_question(question)
-        if self.grade_hallucinations(question, generation):
+        hallicunated = self.grade_hallucinations(question, generation)
+        if not hallicunated.binary_score == "yes":
             return generation.content
         else:
-            return "The answer is hallucinated"
+            return hallicunated.explanation

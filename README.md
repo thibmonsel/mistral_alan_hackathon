@@ -41,3 +41,10 @@ Launch `main.py` to get your personal oncology specialized assistant that will h
 ```python 
 python main.py
 ```
+
+
+You can launch the app but there are issue, try it out : 
+
+```python 
+python app.py
+```
