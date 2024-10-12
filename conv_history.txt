@@ -1,0 +1,3 @@
+Patient: I’ve been feeling very tired lately and I’m not sure if it’s a side effect of the treatment or something else.
+Assistant: Have you noticed any other new symptoms?
+Patient: No, just the fatigue.

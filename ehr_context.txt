@@ -1,0 +1,41 @@
+Patient Name: Jane Doe
+Age: 52
+Gender: Female
+
+Medical History:
+- Diagnosed with breast cancer in 2022
+- Undergoing chemotherapy (current treatment: Paclitaxel)
+- History of hypertension
+- Allergy to penicillin
+
+Current Medications:
+- Paclitaxel (chemotherapy)
+- Lisinopril (for hypertension)
+- Ondansetron (to prevent nausea during chemotherapy)
+
+Recent Symptoms:
+- Fatigue
+- Mild nausea
+- Hair loss (due to chemotherapy)
+- Occasional headaches
+
+Previous Surgeries:
+- Lumpectomy (2022)
+
+Family Medical History:
+- Mother: Breast cancer (deceased at 65)
+- Father: Hypertension, Type 2 diabetes
+
+Lifestyle:
+- Non-smoker
+- Occasionally drinks alcohol
+- Exercises 2-3 times a week (light exercise due to fatigue)
+
+Lab Results (Last month):
+- White blood cell count: 4.5 (normal)
+- Hemoglobin: 11.2 (slightly below normal, likely due to chemotherapy)
+- Liver function: Normal
+- Kidney function: Normal
+
+Next Appointment:
+- Oncologist: Dr. Smith, October 20, 2024
