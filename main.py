@@ -22,5 +22,6 @@ if __name__ == "__main__":
         db_doctor_path="rag_dataset_doctor.json",
         ehr_path="ehr_context.txt",
     )
-    out = chatbot.run_once("How do I treat a patient with stage 3 breast cancer?")
+    val = input("Im your oncology specialist how may I help you ? : ")
+    out = chatbot.run_once(val)
     print(out)
