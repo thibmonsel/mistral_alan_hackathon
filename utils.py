@@ -3,7 +3,9 @@ Code adapted from HF https://huggingface.co/spaces/pdf2dataset/pdf2dataset/blob/
 
 """
 
+import getpass
 import json
+import os
 import re
 import urllib.request
 
@@ -11,6 +13,11 @@ import gradio as gr
 from cleantext import clean as cl
 from datasets import Dataset
 from pypdf import PdfReader
+
+
+def _set_env(var: str):
+    if not os.environ.get(var):
+        os.environ[var] = getpass.getpass(f"{var}: ")
 
 
 # Function to download a PDF
@@ -136,7 +143,6 @@ def create_json_file_dataset(list_of_pdf, json_filename):
     list_of_texts, list_of_urls = [], []
     list_of_pdf = list_of_pdf.split(",")
     for pdf in list_of_pdf:
-        print("pdf", pdf)
         dataset = pdf2dataset(pdf)
         url, text = post_process_scraped_pdf(dataset)
         list_of_texts.append(text)
@@ -145,7 +151,7 @@ def create_json_file_dataset(list_of_pdf, json_filename):
     # Create the data dictionary
     data = {}
     for url, text in zip(list_of_urls, list_of_texts):
-        data[url.split("/")[-1]] = {"url": url, "text": list_of_texts}
+        data[url.split("/")[-1]] = {"url": url, "text": list_of_texts[0]}
 
     # Convert to JSON
     json_data = json.dumps(data, indent=2)
