@@ -35,14 +35,13 @@ class MistralChatbot:
     """ """
 
     rag_prompt = """
-    You are an assistant helping a cancer patient. Based on the conversation, suggest 4 relevant and helpful questions that the patient can ask their doctor or that can help clarify their situation.
-    Please answer the following questions:
+    You are an assistant helping a cancer patient. Based on the conversation, please answer the following questions:
     {questions}
 
     Context (if available):
     {context}
 
-    After answering the patient's question please provide the 4 questions in a numbered list, separated by new lines.
+    After answering the patient's question.
     """
 
     router_prompt = """You are an expert at routing a user question to answer either very precise and complex questions or everything else.
@@ -50,8 +49,7 @@ class MistralChatbot:
     Use the vectorstore for questions on these topics. For all else, concatenate the EHR text to the prompt."""
 
     simple_prompt = """ You are an assistant helping a cancer patient. 
-
-    Based on the conversation, suggest 4 relevant and helpful questions that the patient can ask their doctor or that can help clarify their situation.
+    Based on the conversation, the patient can ask their doctor or that can help clarify their situation.
     
     The patient's Electronic Health Record : {ehr} 
     
@@ -88,8 +86,6 @@ class MistralChatbot:
 
     simple_question_prompt = """ You are an assistant helping a cancer patient. 
 
-    Based on the conversation, suggest 4 relevant and helpful questions
-
     that the patient can ask their doctor or that can help clarify their situation.
 
     The patient's Electronic Health Record : {ehr} 
@@ -100,6 +96,16 @@ class MistralChatbot:
 
     Answer:"""
 
+    suggest_questions_prompt = """ ou are an assistant helping a cancer patient. 
+
+    that the patient can ask their doctor or that can help clarify their situation.
+
+    The patient's Electronic Health Record : {ehr} 
+
+    His question: {question}
+
+    Based on the conversation, suggest 4 relevant and helpful questions. Please provide only the questions nothing else.
+    """
     def __init__(
         self,
         db_patient_path,
@@ -110,7 +116,8 @@ class MistralChatbot:
         debug=False,
     ) -> None:
         # QUESTION CAN YOU CHANGE THE TEMPERATURE DEPENDING ON THE FLOW ?
-        self.llm = ChatMistralAI(model=mistral_model, temperature=temperature)
+        self.llm = ChatMistralAI(model="mistral-small-2409", temperature=temperature)
+        # self.llm_small = ChatMistralAI(model="mistral-small", temperature=0.0)
         self.structured_llm_router = self.llm.with_structured_output(RouteQuery)
         self.structured_llm_hallucination_grader = self.llm.with_structured_output(
             GradeHallucinations
@@ -182,18 +189,28 @@ class MistralChatbot:
 
         return generation
 
+    def suggest_questions(self, question):
+        ehr = open(self.ehr_path, "r").read()
+        simple_prompt_formatted = self.suggest_questions_prompt.format(
+            ehr=ehr, question=question
+        )
+        generation = self.llm.invoke([HumanMessage(content=simple_prompt_formatted)])
+        if self.debug:
+            print("\n suggest_questions: ", generation)
+        return generation
+
+
     def answer_simple_question(self, question):
         """
         If the question is deemed easy just the patient's EHR will help provide context.
         """
         ehr = open(self.ehr_path, "r").read()
-        simple_prompt_formatted = self.simple_question_prompt.format(
+        suggest_questions_prompt_formatted = self.simple_question_prompt.format(
             ehr=ehr, question=question
         )
-        generation = self.llm.invoke([HumanMessage(content=simple_prompt_formatted)])
+        generation = self.llm.invoke([HumanMessage(content=suggest_questions_prompt_formatted)])
         if self.debug:
-            print("simple_prompt_formatted,", simple_prompt_formatted)
-            print("\n generation: ", generation)
+            print("\n answer simple question: ", generation)
         return generation
 
     def grade_hallucinations(self, question, generation):
@@ -221,12 +238,14 @@ class MistralChatbot:
         This function runs the chatbot once.
         """
         route = self.route_query(question)
+        suggested_question = self.suggest_questions(question)
         if route.datasource == "simple":
             generation = self.answer_simple_question(question)
         else:
             generation = self.answer_complex_question(question)
-        hallicunated = self.grade_hallucinations(question, generation)
-        if not hallicunated.binary_score == "yes":
-            return generation.content
-        else:
-            return hallicunated.explanation
+        return generation.content, suggested_question.content
+        # hallicunated = self.grade_hallucinations(question, generation)
+        # if not hallicunated.binary_score == "yes":
+        #     return generation.content
+        # else:
+        #     return hallicunated.explanation
