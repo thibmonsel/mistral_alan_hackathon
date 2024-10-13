@@ -39,7 +39,7 @@ Before doing anything please make sure to specify the following API keys necessa
 Launch `main.py` to get your personal oncology specialized assistant that will help you through your diagnosis ! 
 
 ```python 
-python main.py
+python main.py1
 ```
 
 
