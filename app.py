@@ -5,15 +5,10 @@ from llm_chatbot import MistralChatbot
 from utils import _set_env
 
 
-os.environ["HF_TOKEN"] = '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'
-os.environ["TAVILY_API_KEY"] = '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'
-os.environ["MISTRAL_API_KEY"] = 'oh8TV1P4NXoafrmMt89YTO1j6rThgrY4'
-os.environ["LANGCHAIN_API_KEY"] = "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"
-
-# _set_env("MISTRAL_API_KEY")
-# _set_env("TAVILY_API_KEY")
-# _set_env("HF_TOKEN")
-# _set_env("LANGCHAIN_API_KEY")
+_set_env("MISTRAL_API_KEY")
+_set_env("TAVILY_API_KEY")
+_set_env("HF_TOKEN")
+_set_env("LANGCHAIN_API_KEY")
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
